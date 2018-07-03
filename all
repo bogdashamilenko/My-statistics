@@ -1,0 +1,6 @@
+#Non-parametric tests
+cor.test(df$urban,df$gdp, method = 'pearson', conf.level = 0.95, exact = F, alternative = 'two.sided')
+cor.test(df$urban,df$gdp, method = 'spearman', conf.level = 0.95, exact = F)
+cor.test(df$urban,df$gdp, method = 'kendall', conf.level = 0.95, exact = F)
+
+#Parametric tests
