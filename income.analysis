@@ -1,0 +1,51 @@
+leveneTest(df$income, df$educ)
+#Completing Levene Test we can see the p-value equal to 0.0001254 which is < 5% 
+#and this means that there is a relationship between variances;
+#In this case let`s complete Welch test and determine significance of education towards income level
+
+oneway.test(income~educ, df, var.equal = T)
+#p-value = 5.713e-10 is ;ower that 5% so we can say that education is statistically significant; 
+
+posthoc.tgh(df$income,df$educ)
+#Post-hoc test is exectiuted we can see that there is a statistical difference only bewteen "Did not complete high school:Some college"
+#Other relationship was close to significance "High school degree:Some college" with the p-value of 0.05387
+
+#Moving further to the two-way ANOVA:
+aov1 <- aov(income ~ educ + agecat + educ*agecat, df)
+summary(aov1)
+             Df Sum Sq Mean Sq F value  Pr(>F)    
+educ          4  64460   16115  15.292 5.5e-12 ***
+agecat        2 147377   73689  69.925 < 2e-16 ***
+educ:agecat   7  12582    1797   1.706   0.105    
+Residuals   686 722927    1054   
+#As it can be seen, the interaction between education and age on their influence on the income is not statistically  significant, 
+#so there is no need to look for a  Simple main effect; 
+
+#Three-way ANOVA
+aov1 <- aov(income ~ educ + agecat +gender+ educ*agecat +educ*gender + gender*agecat + gender*educ*agecat, df)
+summary(aov1)
+                    Df Sum Sq Mean Sq F value   Pr(>F)    
+educ                 4  64460   16115  16.307 9.31e-13 ***
+agecat               2 147377   73689  74.566  < 2e-16 ***
+gender               1   1818    1818   1.840 0.175402    
+educ:agecat          7  11782    1683   1.703 0.105209    
+educ:gender          4  23343    5836   5.905 0.000113 ***
+agecat:gender        2   1328     664   0.672 0.511058    
+educ:agecat:gender   6  32153    5359   5.423 1.73e-05 ***
+Residuals          673 665084     988 
+#The second order interaction plays a significant role on the income so let`s break it down and find out the truth about our data!
+#We will determine such interaction effects:
+# 1. age and gender for each education
+# 2. age and education for each gender
+# 3. gender and education for each category in age
+
+table(df$agecat,df$educ) 
+#Just observing our data and quantity of factors; 
+dfcoldeg <- subset(df, educ == "College degree")
+dfno.high.sch. <- subset(df, educ == "Did not complete high school")
+df.just.high.sch. <- subset(df, educ == "High school degree")
+df.post.und. <- subset(df, educ == "Post-undergraduate degree")
+df.sm.col <- subset(df, educ == "Some college")
+#After all required df are created, let`s explore interactions with two-way ANOVA
+
+
