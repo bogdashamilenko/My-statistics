@@ -46,6 +46,121 @@ dfno.high.sch. <- subset(df, educ == "Did not complete high school")
 df.just.high.sch. <- subset(df, educ == "High school degree")
 df.post.und. <- subset(df, educ == "Post-undergraduate degree")
 df.sm.col <- subset(df, educ == "Some college")
-#After all required df are created, let`s explore interactions with two-way ANOVA
 
+#After all required df are created, let`s explore interactions with two-way ANOVA for each type of education
+#This means creating 5 separate ANOVA models to determine wheather the simple second order interaction 
+#effect is statistically significant or not. 
 
+aov.1.1 <- aov(income~ agecat*gender, df.just.high.sch.)
+summary(aov.1.1)
+               Df Sum Sq Mean Sq F value   Pr(>F)    
+agecat          2  56085   28042  37.846 1.39e-14 ***
+gender          1   7784    7784  10.506   0.0014 ** 
+agecat:gender   2   5743    2872   3.876   0.0224 *  
+Residuals     192 142264     741 
+
+aov.1.2 <- aov(income~ agecat*gender, df.post.und.)
+summary(aov.1.2)
+            Df Sum Sq Mean Sq F value Pr(>F)
+agecat       1   1153    1153   0.129  0.754
+gender       1   1568    1568   0.175  0.716
+Residuals    2  17906    8953  
+
+aov.1.3 <- aov(income~ agecat*gender, df.sm.col)
+summary(aov.1.3)
+              Df Sum Sq Mean Sq F value  Pr(>F)   
+agecat         2  21497   10748   7.242 0.00128 **
+gender         1   5735    5735   3.864 0.05276 . 
+agecat:gender  2    847     424   0.285 0.75248   
+Residuals     81 120217    1484         
+
+aov.1.4 <- aov(income~ agecat*gender, dfcoldeg)
+summary(aov.1.4)
+              Df Sum Sq Mean Sq F value Pr(>F)  
+agecat         2  25011   12505   2.399 0.1070  
+gender         1   7296    7296   1.400 0.2455  
+agecat:gender  2  26426   13213   2.535 0.0951 .
+Residuals     32 166811    5213
+
+aov.1.5 <- aov(income~ agecat*gender, dfno.high.sch.)
+summary(aov.1.5)
+               Df Sum Sq Mean Sq F value Pr(>F)    
+agecat          2  56213   28107  47.213 <2e-16 ***
+gender          1   1979    1979   3.324 0.0691 .  
+agecat:gender   2    465     232   0.390 0.6770    
+Residuals     366 217885     595 
+
+#Looking at our results we can see that the simple second order interaction effect is statistically significant for people 
+#who have just high scool diploma. This means that we need to dig further and breack down the df by gender to determine 
+#importance of features for this group.
+
+df.just.high.sch.males <- subset(df.just.high.sch., gender == 'Male')
+df.just.high.sch.females <- subset(df.just.high.sch., gender == 'Female')
+
+aov.2.1. <- aov(income ~ agecat, df.just.high.sch.males)
+summary(aov.2.1.)
+             Df Sum Sq Mean Sq F value   Pr(>F)    
+agecat        2  50313   25157   26.28 2.24e-10 ***
+Residuals   136 130184     957                     
+
+TukeyHSD(aov.2.1.)
+$`agecat`
+                      diff       lwr       upr     p adj
+Over 44-31-44     34.09058  15.47189  52.70927 0.0000819
+Up to 30-31-44   -24.09942 -37.71567 -10.48317 0.0001447
+Up to 30-Over 44 -58.19000 -77.58736 -38.79264 0.0000000
+
+aov.2.2. <- aov(income ~ agecat, df.just.high.sch.females)
+summary(aov.2.2.)
+            Df Sum Sq Mean Sq F value  Pr(>F)   
+agecat       2   2778  1389.0   6.439 0.00304 **
+Residuals   56  12080   215.7                   
+
+TukeyHSD(aov.2.2.)
+ $`agecat`
+                       diff       lwr       upr     p adj
+Over 44-31-44    -13.142857 -39.02442 12.738710 0.4449994
+Up to 30-31-44   -13.780788 -23.14958 -4.412001 0.0023029
+Up to 30-Over 44  -0.637931 -26.48973 25.213870 0.9980560
+
+#As it can be seen from our results the age of males is highly impostan feature and has a direct influence on the income, 
+#for example the difference between males under 30 and males over 44 is -$58,190 and this means that males have a tendention 
+#of increasing salary if they obtain high shool diplome.
+#Judjing the results of females with high school diploma we can see that the only signinficant difference may be seen between 
+#females Under 30 and 30-44 ($13,143), after female turns 30 there is a low probability to have a bigger salary. 
+
+#Now we nee to study the influence of gender by age
+df.just.high.sch.upto30 <- subset(df.just.high.sch., agecat == "Up to 30")
+df.just.high.sch.31.44 <- subset(df.just.high.sch., agecat == "31-44")
+df.just.high.sch.over.44 <- subset(df.just.high.sch., agecat == "Over 44")
+aov.2.3 <- aov(income ~ gender, df.just.high.sch.upto30)
+summary(aov.2.3)
+            Df Sum Sq Mean Sq F value Pr(>F)  
+gender       1    705   705.1   4.024 0.0484 *
+Residuals   77  13490   175.2                 
+
+TukeyHSD(aov.2.3)
+$`gender`
+               diff        lwr   upr     p adj
+Male-Female 6.197931 0.04586168 12.35 0.0483578
+
+aov.2.4 <- aov(income ~ gender, df.just.high.sch.31.44)
+summary(aov.2.4)
+            Df Sum Sq Mean Sq F value  Pr(>F)   
+gender       1   5433    5433   8.406 0.00464 **
+Residuals   95  61404     646                   
+TukeyHSD(aov.2.4)
+$`gender`
+                diff      lwr     upr     p adj
+Male-Female 16.51656 5.207331 27.8258 0.0046444
+
+aov.2.5 <- aov(income ~ gender, df.just.high.sch.over.44)
+summary(aov.2.5)
+            Df Sum Sq Mean Sq F value Pr(>F)
+gender       1   7389    7389   2.194  0.154
+Residuals   20  67370    3369               
+TukeyHSD(aov.2.5)
+
+$`gender`
+             diff       lwr      upr     p adj
+Male-Female 63.75 -26.03568 153.5357 0.1541675
