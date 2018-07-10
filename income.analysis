@@ -38,7 +38,7 @@ Residuals          673 665084     988
 # 1. age and gender for each education
 # 2. age and education for each gender
 # 3. gender and education for each category in age
-
+#1.
 table(df$agecat,df$educ) 
 #Just observing our data and quantity of factors; 
 dfcoldeg <- subset(df, educ == "College degree")
@@ -164,3 +164,25 @@ TukeyHSD(aov.2.5)
 $`gender`
              diff       lwr      upr     p adj
 Male-Female 63.75 -26.03568 153.5357 0.1541675
+
+#2.As we finished with our first section checking age and gender for each education let`s move on age and education for each gender.
+#This will be easier as we have only two-level factor. 
+df.males <- subset(df, gender == 'Male')
+df.females <- subset(df, gender == 'Female')
+aov.3.1 <- aov(income ~ agecat*educ, df.males)
+aov.3.2 <- aov(income ~ agecat*educ, df.females)
+summary(aov.3.1)
+             Df Sum Sq Mean Sq F value   Pr(>F)    
+agecat        2 115079   57539  65.891  < 2e-16 ***
+educ          4  40984   10246  11.733 4.05e-09 ***
+agecat:educ   7   8937    1277   1.462    0.179    
+Residuals   503 439246     873                     
+
+summary(aov.3.2)
+             Df Sum Sq Mean Sq F value   Pr(>F)    
+agecat        2  35667   17833  13.424 3.86e-06 ***
+educ          4  40821   10205   7.682 1.03e-05 ***
+agecat:educ   6  36003    6001   4.517 0.000283 ***
+Residuals   170 225838    1328    
+
+#
