@@ -1,4 +1,4 @@
-leveneTest(df$income, df$educ)
+> leveneTest(df$income, df$educ)
 #Completing Levene Test we can see the p-value equal to 0.0001254 which is < 5% 
 #and this means that there is a relationship between variances;
 #In this case let`s complete Welch test and determine significance of education towards income level
@@ -11,8 +11,8 @@ posthoc.tgh(df$income,df$educ)
 #Other relationship was close to significance "High school degree:Some college" with the p-value of 0.05387
 
 #Moving further to the two-way ANOVA:
-aov1 <- aov(income ~ educ + agecat + educ*agecat, df)
-summary(aov1)
+> aov1 <- aov(income ~ educ + agecat + educ*agecat, df)
+> summary(aov1)
              Df Sum Sq Mean Sq F value  Pr(>F)    
 educ          4  64460   16115  15.292 5.5e-12 ***
 agecat        2 147377   73689  69.925 < 2e-16 ***
@@ -22,8 +22,8 @@ Residuals   686 722927    1054
 #so there is no need to look for a  Simple main effect; 
 
 #Three-way ANOVA
-aov1 <- aov(income ~ educ + agecat +gender+ educ*agecat +educ*gender + gender*agecat + gender*educ*agecat, df)
-summary(aov1)
+> aov1 <- aov(income ~ educ + agecat +gender+ educ*agecat +educ*gender + gender*agecat + gender*educ*agecat, df)
+> summary(aov1)
                     Df Sum Sq Mean Sq F value   Pr(>F)    
 educ                 4  64460   16115  16.307 9.31e-13 ***
 agecat               2 147377   73689  74.566  < 2e-16 ***
@@ -39,51 +39,51 @@ Residuals          673 665084     988
 # 2. age and education for each gender
 # 3. gender and education for each category in age
 #1.
-table(df$agecat,df$educ) 
+> table(df$agecat,df$educ) 
 #Just observing our data and quantity of factors; 
-dfcoldeg <- subset(df, educ == "College degree")
-dfno.high.sch. <- subset(df, educ == "Did not complete high school")
-df.just.high.sch. <- subset(df, educ == "High school degree")
-df.post.und. <- subset(df, educ == "Post-undergraduate degree")
-df.sm.col <- subset(df, educ == "Some college")
+> dfcoldeg <- subset(df, educ == "College degree")
+> dfno.high.sch. <- subset(df, educ == "Did not complete high school")
+> df.just.high.sch. <- subset(df, educ == "High school degree")
+> df.post.und. <- subset(df, educ == "Post-undergraduate degree")
+> df.sm.col <- subset(df, educ == "Some college")
 
 #After all required df are created, let`s explore interactions with two-way ANOVA for each type of education
 #This means creating 5 separate ANOVA models to determine wheather the simple second order interaction 
 #effect is statistically significant or not. 
 
-aov.1.1 <- aov(income~ agecat*gender, df.just.high.sch.)
-summary(aov.1.1)
+> aov.1.1 <- aov(income~ agecat*gender, df.just.high.sch.)
+> summary(aov.1.1)
                Df Sum Sq Mean Sq F value   Pr(>F)    
 agecat          2  56085   28042  37.846 1.39e-14 ***
 gender          1   7784    7784  10.506   0.0014 ** 
 agecat:gender   2   5743    2872   3.876   0.0224 *  
 Residuals     192 142264     741 
 
-aov.1.2 <- aov(income~ agecat*gender, df.post.und.)
-summary(aov.1.2)
+> aov.1.2 <- aov(income~ agecat*gender, df.post.und.)
+> summary(aov.1.2)
             Df Sum Sq Mean Sq F value Pr(>F)
 agecat       1   1153    1153   0.129  0.754
 gender       1   1568    1568   0.175  0.716
 Residuals    2  17906    8953  
 
-aov.1.3 <- aov(income~ agecat*gender, df.sm.col)
-summary(aov.1.3)
+> aov.1.3 <- aov(income~ agecat*gender, df.sm.col)
+> summary(aov.1.3)
               Df Sum Sq Mean Sq F value  Pr(>F)   
 agecat         2  21497   10748   7.242 0.00128 **
 gender         1   5735    5735   3.864 0.05276 . 
 agecat:gender  2    847     424   0.285 0.75248   
 Residuals     81 120217    1484         
 
-aov.1.4 <- aov(income~ agecat*gender, dfcoldeg)
-summary(aov.1.4)
+> aov.1.4 <- aov(income~ agecat*gender, dfcoldeg)
+> summary(aov.1.4)
               Df Sum Sq Mean Sq F value Pr(>F)  
 agecat         2  25011   12505   2.399 0.1070  
 gender         1   7296    7296   1.400 0.2455  
 agecat:gender  2  26426   13213   2.535 0.0951 .
 Residuals     32 166811    5213
 
-aov.1.5 <- aov(income~ agecat*gender, dfno.high.sch.)
-summary(aov.1.5)
+> aov.1.5 <- aov(income~ agecat*gender, dfno.high.sch.)
+> summary(aov.1.5)
                Df Sum Sq Mean Sq F value Pr(>F)    
 agecat          2  56213   28107  47.213 <2e-16 ***
 gender          1   1979    1979   3.324 0.0691 .  
@@ -94,29 +94,29 @@ Residuals     366 217885     595
 #who have just high scool diploma. This means that we need to dig further and breack down the df by gender to determine 
 #importance of features for this group.
 
-df.just.high.sch.males <- subset(df.just.high.sch., gender == 'Male')
-df.just.high.sch.females <- subset(df.just.high.sch., gender == 'Female')
+> df.just.high.sch.males <- subset(df.just.high.sch., gender == 'Male')
+> df.just.high.sch.females <- subset(df.just.high.sch., gender == 'Female')
 
-aov.2.1. <- aov(income ~ agecat, df.just.high.sch.males)
-summary(aov.2.1.)
+> aov.2.1. <- aov(income ~ agecat, df.just.high.sch.males)
+> summary(aov.2.1.)
              Df Sum Sq Mean Sq F value   Pr(>F)    
 agecat        2  50313   25157   26.28 2.24e-10 ***
 Residuals   136 130184     957                     
 
-TukeyHSD(aov.2.1.)
+> TukeyHSD(aov.2.1.)
 $`agecat`
                       diff       lwr       upr     p adj
 Over 44-31-44     34.09058  15.47189  52.70927 0.0000819
 Up to 30-31-44   -24.09942 -37.71567 -10.48317 0.0001447
 Up to 30-Over 44 -58.19000 -77.58736 -38.79264 0.0000000
 
-aov.2.2. <- aov(income ~ agecat, df.just.high.sch.females)
-summary(aov.2.2.)
+> aov.2.2. <- aov(income ~ agecat, df.just.high.sch.females)
+> summary(aov.2.2.)
             Df Sum Sq Mean Sq F value  Pr(>F)   
 agecat       2   2778  1389.0   6.439 0.00304 **
 Residuals   56  12080   215.7                   
 
-TukeyHSD(aov.2.2.)
+> TukeyHSD(aov.2.2.)
  $`agecat`
                        diff       lwr       upr     p adj
 Over 44-31-44    -13.142857 -39.02442 12.738710 0.4449994
@@ -130,22 +130,22 @@ Up to 30-Over 44  -0.637931 -26.48973 25.213870 0.9980560
 #females Under 30 and 30-44 ($13,143), after female turns 30 there is a low probability to have a bigger salary. 
 
 #Now we nee to study the influence of gender by age
-df.just.high.sch.upto30 <- subset(df.just.high.sch., agecat == "Up to 30")
-df.just.high.sch.31.44 <- subset(df.just.high.sch., agecat == "31-44")
-df.just.high.sch.over.44 <- subset(df.just.high.sch., agecat == "Over 44")
-aov.2.3 <- aov(income ~ gender, df.just.high.sch.upto30)
-summary(aov.2.3)
+> df.just.high.sch.upto30 <- subset(df.just.high.sch., agecat == "Up to 30")
+> df.just.high.sch.31.44 <- subset(df.just.high.sch., agecat == "31-44")
+> df.just.high.sch.over.44 <- subset(df.just.high.sch., agecat == "Over 44")
+> aov.2.3 <- aov(income ~ gender, df.just.high.sch.upto30)
+> summary(aov.2.3)
             Df Sum Sq Mean Sq F value Pr(>F)  
 gender       1    705   705.1   4.024 0.0484 *
 Residuals   77  13490   175.2                 
 
-TukeyHSD(aov.2.3)
+> TukeyHSD(aov.2.3)
 $`gender`
                diff        lwr   upr     p adj
 Male-Female 6.197931 0.04586168 12.35 0.0483578
 
-aov.2.4 <- aov(income ~ gender, df.just.high.sch.31.44)
-summary(aov.2.4)
+> aov.2.4 <- aov(income ~ gender, df.just.high.sch.31.44)
+> summary(aov.2.4)
             Df Sum Sq Mean Sq F value  Pr(>F)   
 gender       1   5433    5433   8.406 0.00464 **
 Residuals   95  61404     646                   
@@ -154,12 +154,12 @@ $`gender`
                 diff      lwr     upr     p adj
 Male-Female 16.51656 5.207331 27.8258 0.0046444
 
-aov.2.5 <- aov(income ~ gender, df.just.high.sch.over.44)
-summary(aov.2.5)
+> aov.2.5 <- aov(income ~ gender, df.just.high.sch.over.44)
+> summary(aov.2.5)
             Df Sum Sq Mean Sq F value Pr(>F)
 gender       1   7389    7389   2.194  0.154
 Residuals   20  67370    3369               
-TukeyHSD(aov.2.5)
+> TukeyHSD(aov.2.5)
 
 $`gender`
              diff       lwr      upr     p adj
@@ -167,22 +167,139 @@ Male-Female 63.75 -26.03568 153.5357 0.1541675
 
 #2.As we finished with our first section checking age and gender for each education let`s move on age and education for each gender.
 #This will be easier as we have only two-level factor. 
-df.males <- subset(df, gender == 'Male')
-df.females <- subset(df, gender == 'Female')
-aov.3.1 <- aov(income ~ agecat*educ, df.males)
-aov.3.2 <- aov(income ~ agecat*educ, df.females)
-summary(aov.3.1)
+> df.males <- subset(df, gender == 'Male')
+> df.females <- subset(df, gender == 'Female')
+> aov.3.1 <- aov(income ~ agecat*educ, df.males)
+> aov.3.2 <- aov(income ~ agecat*educ, df.females)
+> summary(aov.3.1)
              Df Sum Sq Mean Sq F value   Pr(>F)    
 agecat        2 115079   57539  65.891  < 2e-16 ***
 educ          4  40984   10246  11.733 4.05e-09 ***
 agecat:educ   7   8937    1277   1.462    0.179    
 Residuals   503 439246     873                     
 
-summary(aov.3.2)
+> summary(aov.3.2)
              Df Sum Sq Mean Sq F value   Pr(>F)    
 agecat        2  35667   17833  13.424 3.86e-06 ***
 educ          4  40821   10205   7.682 1.03e-05 ***
 agecat:educ   6  36003    6001   4.517 0.000283 ***
 Residuals   170 225838    1328    
 
-#
+#As it can be seen the interaction between age and education is not statistically significant, we can run the simple anova test 
+#and after the post hoc test to determine the difference in males income depending on their age and education.
+#Let`s update our model so it will contain the only features that influence the income. 
+> ov.3.1 <- aov(income ~ agecat + educ, df.males)
+> summary(aov.3.1)
+             Df Sum Sq Mean Sq F value   Pr(>F)    
+agecat        2 115079   57539   65.48  < 2e-16 ***
+educ          4  40984   10246   11.66 4.56e-09 ***
+Residuals   510 448183     879                     
+
+> TukeyHSD(aov.3.1)
+$`agecat`
+                      diff       lwr       upr p adj
+Over 44-31-44     23.91316  14.91734  32.90898     0
+Up to 30-31-44   -22.19582 -29.13568 -15.25595     0
+Up to 30-Over 44 -46.10897 -55.85643 -36.36152     0
+
+$educ
+                                                              diff          lwr        upr     p adj
+Did not complete high school-College degree            -13.8337567  -31.0642089   3.396695 0.1821023
+High school degree-College degree                       -1.2620795  -19.2006262  16.676467 0.9996924
+Post-undergraduate degree-College degree                64.0705831   20.2427626 107.898404 0.0006863
+Some college-College degree                             -1.6385626  -21.3857813  18.108656 0.9994089
+High school degree-Did not complete high school         12.5716773    4.2135854  20.929769 0.0004280
+Post-undergraduate degree-Did not complete high school  77.9043398   37.0516277 118.757052 0.0000026
+Some college-Did not complete high school               12.1951941    0.4470502  23.943338 0.0374548
+Post-undergraduate degree-High school degree            65.3326626   24.1762892 106.489036 0.0001626
+Some college-High school degree                         -0.3764831  -13.1405680  12.387602 0.9999904
+Some college-Post-undergraduate degree                 -65.7091457 -107.6854278 -23.732864 0.0002111
+
+#As a result of this analysis we can sum up that for males it is not important whether you have college degree, high school degree or 
+#some college degree as the income will be the same. There is a slight difference in salary between Did not completed high school
+#and College degree ($13,833.76) though if you have not completed a high school to tend to easn the least amounts. 
+#People who earn the most obtain Post-undergraduate degree and the second place belong to males with Some college degree/College degree/
+#High school diploma. Though the difference in numbers is crucial as the gap between first and second place is ~ $65,000. 
+
+#Let`s get back to females and study the second order interaction. We need to create new df. 
+> df.females.under30 <- subset(df.females, agecat == "Up to 30")
+> df.females.31.44 <- subset(df.females, agecat == "31-44")
+> df.females.over.44 <- subset(df.females, agecat == "Over 44")
+> aov.3.3 <- aov(income ~ educ, df.females.under30)
+> summary(aov.3.3)
+            Df Sum Sq Mean Sq F value   Pr(>F)    
+educ         3   5079  1693.1   13.63 2.69e-07 ***
+Residuals   82  10185   124.2                     
+
+> TukeyHSD(aov.3.3)
+
+$`educ`
+                                                      diff        lwr        upr     p adj
+Did not complete high school-College degree     -11.888889 -22.781431 -0.9963471 0.0268565
+High school degree-College degree                -7.026820 -18.179186  4.1255464 0.3555167
+Some college-College degree                      11.027778  -1.860451 23.9160070 0.1201312
+High school degree-Did not complete high school   4.862069  -2.430859 12.1549967 0.3057561
+Some college-Did not complete high school        22.916667  13.174081 32.6592522 0.0000001
+Some college-High school degree                  18.054598   8.022361 28.0868348 0.0000561
+
+> aov.3.4 <- aov(income~educ, df.females.31.44)
+> summary(aov.3.4)
+            Df Sum Sq Mean Sq F value  Pr(>F)    
+educ         3  62389   20796   8.477 6.9e-05 ***
+Residuals   71 174185    2453                    
+
+> TukeyHSD(aov.3.4)
+
+$`educ`
+                                                       diff          lwr        upr     p adj
+Did not complete high school-College degree     -132.633333 -211.5416567 -53.725010 0.0001986
+High school degree-College degree               -129.023810 -208.1879141 -49.859705 0.0003202
+Some college-College degree                      -90.238095 -173.1442773  -7.331913 0.0275671
+High school degree-Did not complete high school    3.609524  -30.6326600  37.851708 0.9924865
+Some college-Did not complete high school         42.395238    0.2169651  84.573511 0.0483570
+Some college-High school degree                   38.785714   -3.8691645  81.440593 0.0878129
+
+> aov.3.5 <- aov(income~educ, df.females.over.44)
+> summary((aov.3.3))
+            Df Sum Sq Mean Sq F value   Pr(>F)    
+educ         3   5079  1693.1   13.63 2.69e-07 ***
+Residuals   82  10185   124.2                     
+
+> summary(aov.3.5)
+            Df Sum Sq Mean Sq F value Pr(>F)
+educ         4   9356    2339   0.959  0.455
+Residuals   17  41467    2439               
+> TukeyHSD(aov.3.5)
+$`educ`
+                                                            diff        lwr       upr     p adj
+Did not complete high school-College degree            -10.96154 -125.09537 103.17230 0.9982421
+High school degree-College degree                      -42.00000 -192.26418 108.26418 0.9107830
+Post-undergraduate degree-College degree                 1.50000 -182.53528 185.53528 0.9999999
+Some college-College degree                             34.00000  -96.13260 164.13260 0.9285675
+High school degree-Did not complete high school        -31.03846 -145.17230  83.09537 0.9184333
+Post-undergraduate degree-Did not complete high school  12.46154 -143.47497 168.39805 0.9991446
+Some college-Did not complete high school               44.96154  -40.95529 130.87837 0.5215467
+Post-undergraduate degree-High school degree            43.50000 -140.53528 227.53528 0.9491578
+Some college-High school degree                         76.00000  -54.13260 206.13260 0.4174739
+Some college-Post-undergraduate degree                  32.50000 -135.50046 200.50046 0.9749843
+
+#As it can be seen education plays a great role as well as age. First two sets has shown that the education is statistically significant 
+#and the third is not. It is quite a surprise so let`s check the third df for normality as all tests above can be performed under the
+#assumption that the data is normally disturbited. 
+> mean(df.females.over.44$income)
+[1] 64.45455
+> median(df.females.over.44$income)
+[1] 50
+> shapiro.test(df.females.over.44$income)
+
+	Shapiro-Wilk normality test
+
+data:  df.females.over.44$income
+W = 0.79634, p-value = 0.0004388
+
+> qqnorm(df.females.over.44$income)
+
+#We have run a few tests to determine the normality. As we can see the median and mean are significantly different, but we cannot 
+#say for sure whithout Shapiro-Wilk test. The p-value is less than 5% so we can reject the null hypothesis and say that data is not 
+#normally distributed and we cannot run those tests. 
+
