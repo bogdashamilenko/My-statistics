@@ -1,0 +1,45 @@
+> df <- read.csv('vehicles.csv')
+> any(is.na(df))
+> na.omit(df) # or df[complete.cases(df),]
+> pl1 <-ggplot(df,aes(type,price ))+geom_boxplot()
+> df <- df[df$type == "Automobile"& df$price < 60,]
+#Now we have a data without significant outliers and we can check for a homogeneity of regression slopes or level of independance
+#between our factor and covariate.
+> model <- aov(sales ~ price*type,df)
+> av <- Anova(model, type = "III")
+> av
+Anova Table (Type III tests)
+
+Response: sales
+            Sum Sq  Df F value    Pr(>F)    
+(Intercept) 144184   1 33.4606 4.554e-08 ***
+price        45953   1 10.6642  0.001373 ** 
+type          3175   1  0.7368  0.392139    
+price:type     179   1  0.0415  0.838872    
+Residuals   603268 140     
+
+#Since p-value is bigger than 5 we can conclude that there is no sighnificant relationship between factor and covariate, so the assumption
+#of absence of homogenity is met. In case the relationship is statistically significant we cannot run the test and need to seek for a help
+#of non-parametric tests as Johnson-Neyman Procedure. 
+> res <- residuals(model)
+> zres <- scale(res)
+> shapiro.test(zres)
+
+	Shapiro-Wilk normality test
+
+data:  zres
+W = 0.72672, p-value = 4.712e-15
+#Since the p-value is lower than 5% we can conclude that data is not normally distributed and we reject
+# a null hypothesis (the data is normally distributed)and we accept alternative hypothesis. So this assumption is not met. 
+#Let`s move on to checking the homogeneity if variances using Levene Test from packege car. 
+> leveneTest(df$sales,df$type)
+Levene's Test for Homogeneity of Variance (center = median)
+       Df F value  Pr(>F)  
+group   1  5.0065 0.02681 *
+      142
+#Since the p-value is lower than 5% we can say there is no homogeneity of variances. The assumption is not met. 
+
+> pred <- predict(model)
+> ggplot(df)+geom_point(aes(x=pred,y=zres))
+#On the scatter plot we can see that all points are gatgered in one place, so we can conclde that there is no homoscedasticity so
+# this assumption is not met. The scatterplot shows us a cone-pattern shape that is quite typical for heteroscedasticity. 
