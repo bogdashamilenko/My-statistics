@@ -11,3 +11,11 @@ basic_eda <- function(data)
   plot_num(data)
   describe(data)
 }
+#Variables importance
+lares::mplot_importance(var = results$importance$variable, 
+                        imp = results$importance$percentage,
+                        subtitle = "Titanic dataset")
+lares::dalex_variable(explainer, "Age")
+local60 <- lares::dalex_local(explainer,
+                              row = results$datasets$test["60",], 
+                              plot = TRUE)
