@@ -1,0 +1,49 @@
+#We are using data set marketing with the dependant variable Union. It is bonomial o we will perform binomial type of regression to predict
+#whether they will be union member or not. There are three independant variables: age(continuous), satisfaction with the job(ordinal) and 
+#political view(categorical nominal). 
+#First of all we are checking assumptions of outliers and multicollinearity of independant variables. 
+
+> df <- df[,c(2,6,7,8)]
+> df.indep <- df[,c(1,2,4)]
+> install.packages('usdm')
+> vif(df.indep)
+  Variables      VIF
+1       age 1.216778
+2    jobsat       NA
+3   polview       NA
+#The only numeric variable is age and the Variance Inflation Factor is less than 10, so we can continue as there is no multicollinearity. 
+> ggplot(df,aes(union,age))+geom_boxplot()
+
+#Now we can see that both groups do not present outliers at all, so we can continue with the regression.
+> model <- glm(union~age+jobsat+polview,data=df,family=binomial)
+> summary(model)
+#The table quite large so I would not post it, though all parameters are not statistically significant as they are higher than 5%, though
+#the Age has importance of 0.0521 and category of people  who has extremely conservative political view has p-value equal to 0.0865.
+> expb <- exp(coef(model))
+> expb
+#Let`s take a look at coefficients which are close to be important and people with the higher age has 4% more chances to be a union
+#member than younger people. Also, citizens with extremely conservative political views has 60.9% to be a union member. Other factors
+#do not have importance. 
+
+#Let`s continue with the goodness-of-fit calculations and we will start with Hosmer-Lemeshow statistics. It should be >5% if the model 
+#performed well.
+> library(ResourceSelection)
+> hoslem.test(df$union,fitted(model))
+	Hosmer and Lemeshow goodness of fit (GOF) test
+data:  df$union, fitted(model)
+X-squared = 5000, df = 8, p-value < 2.2e-16
+> library(fmsb)
+> NagelkerkeR2(model)
+$`N`
+[1] 5000
+$R2
+[1] 0.0038312
+#As we can see, the model performed really poor, as it describes only 0.3% of results. Though let`s continue our exploration.
+> library(BaylorEdPsych)
+> PseudoR2(model)
+        McFadden     Adj.McFadden        Cox.Snell       Nagelkerke McKelvey.Zavoina 
+    2.591051e-03    -3.574953e-03     2.182736e-03     3.831200e-03     4.964377e-03 
+          Effron            Count        Adj.Count              AIC    Corrected.AIC 
+    2.257911e-03               NA               NA     4.229744e+03     4.229806e+03 
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
