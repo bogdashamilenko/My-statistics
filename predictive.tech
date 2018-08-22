@@ -47,3 +47,47 @@ $R2
     2.257911e-03               NA               NA     4.229744e+03     4.229806e+03 
 \\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
+#Now we will be using the same data but we will choose different dependant and independant variables as we are going to perform
+#multiniomial regression. Dpendant variable is the type of card:
+> table (df$card)
+American Express         Discover       Mastercard            Other             Visa 
+            1000             1333             1202              215             1250 
+#And our independant variables are: age(continuous), gender(dichotomus or binomial) and age(continuous).
+#The assumptions remain the same as for the binomial regression: Outliers and multicollinearity. 
+
+> df <- df[,c(1,2,3,5)]
+> ggplot(df,aes(card,age))+geom_boxplot()
+> ggplot(df,aes(card,income))+geom_boxplot()
+#On the boxplot we can see numerous significant outliers that may negatively influence our model. To make our model cleaner, let`s
+#get rid of the most important outliers, i.e. people with the salary higher than 300,000.
+> df <- subset(df,income<300)
+> ggplot(df,aes(card,income))+geom_boxplot()
+#Looks a bit better right now, we have deleted 34 observations from 5,000 and now we can continue with the multinomial analysis.
+#First of all we will pick up a reference category for each variable that is categorical, both dependant and independant.
+
+> df$gender <- relevel(df$gender, ref = 'Male')
+> df$card <- relevel(df$card, ref = "Other")
+> library(nnet)
+> model<- multinom(card~gender+age+income,data=df)
+> summary(model)
+Coefficients:
+                 (Intercept) genderFemale          age     income
+American Express    1.252334   -0.8324198 -0.002090151 0.01793280
+Discover            1.054368   -0.4531345  0.002069272 0.01997840
+Mastercard          1.141782   -0.3550897  0.005953687 0.01224755
+Visa                1.281010   -0.2452058  0.004374856 0.01042260
+
+#We now have coefficients of the model, though it is better to interpret their antilogariphms.
+> summ <- summary(model)
+> z <- summ$coefficients/summ$standard.errors
+> pv <- pnorm(abs(z),lower.tail = F)*2
+> pv
+                  (Intercept) genderFemale       age       income
+American Express 8.323888e-08 7.884441e-08 0.6127259 5.787055e-10
+Discover         4.747736e-06 2.804839e-03 0.6065860 3.063833e-12
+Mastercard       7.508746e-07 1.941748e-02 0.1351036 2.324264e-05
+Visa             2.452345e-08 1.054975e-01 0.2695227 3.293312e-04
+#As we can see from the model results, all categories and variable except age are statistically significant and they differ from
+#our baselines.
+
+#
