@@ -87,7 +87,79 @@ American Express 8.323888e-08 7.884441e-08 0.6127259 5.787055e-10
 Discover         4.747736e-06 2.804839e-03 0.6065860 3.063833e-12
 Mastercard       7.508746e-07 1.941748e-02 0.1351036 2.324264e-05
 Visa             2.452345e-08 1.054975e-01 0.2695227 3.293312e-04
-#As we can see from the model results, all categories and variable except age are statistically significant and they differ from
-#our baselines.
+#As we can see from the model results, all categories and variables except Age are statistically significant and they differ from
+#our baselines. Also we can change our baselines to see the picture from the other side.
 
 #
+> expb <- exp(coef(model))
+> expb
+                 (Intercept) genderFemale      age   income
+American Express    3.498497    0.4349954 0.997912 1.018095
+Discover            2.870162    0.6356326 1.002071 1.020179
+Mastercard          3.132345    0.7011106 1.005971 1.012323
+Visa                3.600272    0.7825435 1.004384 1.010477
+#Judjing from this table we can see  that most commonly the person would prefere on of AE-Visa cards comparing to other. The same is with
+#the income. THe richer person is the more chances for him to choose one of the most popular financial companies from the list
+#comparing to our baseline category Other. Also, it is more common that females will coose Other category expecially females would not
+#choose American Express and Discover whilst these two financial companies are usually chosen by people with the higher income.
+
+> ci <-confint(model,level=0.95)    #creating confidential intervals for each category(only one is displayed) 
+> ci
+, , American Express
+
+                   2.5 %       97.5 %
+(Intercept)   0.79439595  1.710271122
+genderFemale -1.13625360 -0.528585926
+age          -0.01018326  0.006002958
+income        0.01226028  0.023605325
+> exci <- exp(ci)               #ci for antilogs
+> pred <- fitted(model)
+> pred
+            Other American Express  Discover Mastercard       Visa
+1    0.0669294794        0.1703180 0.2364151 0.24203430 0.28430314
+2    0.0544911434        0.2382643 0.2208771 0.23381131 0.25255615
+
+#Giving you these two rows just as refence and a proof that our model performed really poorly. The probablilities for each category
+#varies around +-25%  and obviously a small probability that person will choose Other category. We may reach almost the same effect by 
+#random assigning of category. The model performed poorly, though we did all of this just for the studying purposes.
+
+#Performimg goodness of fit 
+> library(nnet)
+> model<- multinom(card~gender+age+income,data=df)
+> model0<- multinom(card~1,data = df)
+> LL1 <- logLik(model)
+> LL0 <- logLik(model0)
+> mccfadden <- 1 - (LL1/LL0)
+> mccfadden
+'log Lik.' 0.0226665 (df=16)
+> n <- nrow(df)
+> nagel <- (1 -exp((2/n)*(LL0-LL1)))/(1 - exp(LL0)^(2/n))
+> coxsnell <- (1 -exp((2/n)*(LL0-LL1)))
+> nagel
+'log Lik.' 0.06569196 (df=4)
+> coxsnell
+'log Lik.' 0.06569196 (df=4)
+# 6% of goodness of fit proves my statement above regarding the poor accuracy of the model. We have manually computed 3 different
+#types of r using loglikelyhoods of fitted and null model. So we compared how much our model is better than the model without any
+#dependant variables. 
+
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+#Ordinal Regression
+#So here we continue our work with the same dataframe though now our dependent variable is jobsat (job satisfaction) and the 
+#independent variables are age, gender, income and ed (education level).
+> head(df)
+                 jobsat age gender income ed
+1   Highly dissatisfied  20 Female     31 15
+2   Highly dissatisfied  22   Male     15 17
+3    Somewhat satisfied  67 Female     35 14
+4 Somewhat dissatisfied  23   Male     20 16
+
+#So we will determine how accurate our four independant variables define our josat.Firstly we will do some EDA and we will perform 
+#checking of assumptions. 
+
+> table(df$jobsat)
+  Highly dissatisfied      Highly satisfied Neutral Somewhat dissatisfied   Somewhat satisfied 
+                967                   886          1092                  1041   		1014
+ 
+
+
