@@ -160,6 +160,108 @@ income        0.01226028  0.023605325
 > table(df$jobsat)
   Highly dissatisfied      Highly satisfied Neutral Somewhat dissatisfied   Somewhat satisfied 
                 967                   886          1092                  1041   		1014
- 
 
 
+> df$gender <- relevel(factor(df$gender), ref = 'Male')
+> df$card <- relevel(factor(df$card), ref = 'Visa')
+> model <- polr(factor(card)~gender+age+income, data = df, Hess = T)
+> summary(model)
+Call:
+polr(formula = factor(card) ~ gender + age + income, data = df, 
+    Hess = T)
+
+Coefficients:
+                 Value Std. Error t value
+genderFemale -0.041519  0.0506216 -0.8202
+age           0.001668  0.0014796  1.1273
+income        0.001934  0.0005744  3.3667
+
+Intercepts:
+                          Value    Std. Error t value 
+Visa|Other                 -0.9360   0.0804   -11.6434
+Other|American Express     -0.7159   0.0798    -8.9732
+American Express|Discover   0.1361   0.0793     1.7158
+Discover|Mastercard         1.3131   0.0818    16.0468
+
+Residual Deviance: 14874.12 
+AIC: 14888.12 
+
+#So now we need to interpret a model ad define which variables are statistically impotant. For this we will use Anova function from
+#pakage 'car'. As we can see below there is only one variable that should be considered as the main influencer on type of card.
+> Anova(model)
+Analysis of Deviance Table (Type II tests)
+
+Response: factor(card)
+       LR Chisq Df Pr(>Chisq)    
+gender   0.6727  1  0.4120956    
+age      1.2716  1  0.2594574    
+income  11.3632  1  0.0007491 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+#We can do this in a different way to get detailed p-values for each factor: 
+> df.coef <- coef(summary(model))
+> p <- pnorm(abs(df.coef[,'t value']), lower.tail = F)*2
+> p
+             genderFemale                       age                    income 
+             4.121111e-01              2.596005e-01              7.607381e-04 
+               Visa|Other    Other|American Express American Express|Discover 
+             2.479347e-31              2.881087e-19              8.619020e-02 
+      Discover|Mastercard 
+             6.021519e-58 
+> table.coef <- cbind(df.coef, 'p value'=p)
+> table.coef
+                                 Value   Std. Error     t value      p value
+genderFemale              -0.041519028 0.0506215918  -0.8201842 4.121111e-01
+age                        0.001667982 0.0014795785   1.1273359 2.596005e-01
+income                     0.001933925 0.0005744278   3.3666985 7.607381e-04
+Visa|Other                -0.936042517 0.0803925502 -11.6433987 2.479347e-31
+Other|American Express    -0.715910683 0.0797835012  -8.9731670 2.881087e-19
+American Express|Discover  0.136059672 0.0792959615   1.7158462 8.619020e-02
+Discover|Mastercard        1.313094147 0.0818291756  16.0467723 6.021519e-58
+
+> ci <- confint(model)
+> ci
+                     2.5 %      97.5 %
+genderFemale -0.1407471338 0.057695074
+age          -0.0012312261 0.004568050
+income        0.0008096361 0.003059545
+#Usually if the CI does not contain 0 it means that our variable is important and does contribute to the defining of dependant variable.
+#In our case gender and age are not statistically significant, though Income is crusial.
+
+#Now we can continue to calculation our odds ratio, as these coeficient are easier to interpret. 
+#
+> odds.ratio <- exp(coef(model))
+> odds.ratio
+genderFemale          age       income 
+   0.9593311    1.0016694    1.0019358 
+> ci.odds <- exp(confint(model))
+> ci.odds
+                 2.5 %   97.5 %
+genderFemale 0.8687090 1.059392
+age          0.9987695 1.004578
+income       1.0008100 1.003064
+#So right now we can interpret our odds. We will be doing this only for the income as this is the only variable that has p-value <5%.
+# The higher is income the higher chance for our observations to choose any kind of card except Visa are multiplied by 1.002. In fact
+# we can see that the difference is not so crucial, but we remember that variance of income:
+> summary(df$income)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   9.00   24.00   38.00   52.45   66.00  296.00 
+#So increase of 0.2% for each thousand eared by respondents is somehow important for us. 
+
+#To calculate goodness of fit we will come up with three coeficients called pseudoR
+> model0 <- polr(factor(card)~1,data = df, method = 'logistic', Hess = T)
+> LL0 <- logLik(model0)
+> ll1 <- logLik(model)
+> LL1 <- logLik(model)
+> mcfadden <- 1 - LL1/LLO
+Error: object 'LLO' not found
+> mcfadden <- 1 - LL1/LL0
+> mcfadden <- 1 - (LL1/LL0)
+> n <- nrow(df)
+> coxsnell <- 1 - exp((2/n)*(LL0-LL1))
+> nagel <- (1 - exp((2/n)*(LL0-LL1)))/(1-exp(LL0)^(2/n))
+> pseudo.r <- cbind('McFadden'=mcfadden, 'Cox-Snell'=coxsnell, 'Nagelkerke' = nagel)
+> pseudo.r
+        McFadden   Cox-Snell  Nagelkerke
+[1,] 0.001051058 0.003146469 0.003146469
