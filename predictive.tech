@@ -265,3 +265,19 @@ Error: object 'LLO' not found
 > pseudo.r
         McFadden   Cox-Snell  Nagelkerke
 [1,] 0.001051058 0.003146469 0.003146469
+
+#Now we can check for the proportional odds assumption. 
+> library(ordinal)
+> model1 <- clm(factor(card)~gender+age+income, data= df)
+> nominal_test(model1)
+Tests of nominal effects
+
+formula: factor(card) ~ gender + age + income
+       Df  logLik   AIC     LRT  Pr(>Chi)    
+<none>    -7437.1 14888                      
+gender  3 -7407.9 14836  58.409 1.286e-12 ***
+age     3 -7433.9 14888   6.285   0.09856 .  
+income  3 -7357.9 14736 158.267 < 2.2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
