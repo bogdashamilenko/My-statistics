@@ -147,6 +147,9 @@ income        0.01226028  0.023605325
 #Ordinal Regression
 #So here we continue our work with the same dataframe though now our dependent variable is jobsat (job satisfaction) and the 
 #independent variables are age, gender, income and ed (education level).
+
+> df <- read.csv('marketingdb.csv')
+> df <- df[,c(6,2,1,3,4)]
 > head(df)
                  jobsat age gender income ed
 1   Highly dissatisfied  20 Female     31 15
@@ -162,122 +165,140 @@ income        0.01226028  0.023605325
                 967                   886          1092                  1041   		1014
 
 
+> df$jobsat <- relevel(factor(df$jobsat), ref = 'Neutral')
 > df$gender <- relevel(factor(df$gender), ref = 'Male')
-> df$card <- relevel(factor(df$card), ref = 'Visa')
-> model <- polr(factor(card)~gender+age+income, data = df, Hess = T)
+> model <- polr(factor(jobsat)~age+gender+income+ed, data = df, method = 'logistic', Hess = T)
 > summary(model)
 Call:
-polr(formula = factor(card) ~ gender + age + income, data = df, 
-    Hess = T)
+polr(formula = factor(jobsat) ~ age + gender + income + ed, data = df, 
+    Hess = T, method = "logistic")
 
 Coefficients:
-                 Value Std. Error t value
-genderFemale -0.041519  0.0506216 -0.8202
-age           0.001668  0.0014796  1.1273
-income        0.001934  0.0005744  3.3667
+                  Value Std. Error t value
+age           0.0113892   0.001445  7.8811
+genderFemale -0.0637020   0.050025 -1.2734
+income        0.0009975   0.000481  2.0739
+ed           -0.0025011   0.007811 -0.3202
 
 Intercepts:
-                          Value    Std. Error t value 
-Visa|Other                 -0.9360   0.0804   -11.6434
-Other|American Express     -0.7159   0.0798    -8.9732
-American Express|Discover   0.1361   0.0793     1.7158
-Discover|Mastercard         1.3131   0.0818    16.0468
+                                         Value   Std. Error t value
+Neutral|Highly dissatisfied              -0.7849  0.1400    -5.6074
+Highly dissatisfied|Highly satisfied      0.1509  0.1395     1.0816
+Highly satisfied|Somewhat dissatisfied    0.8822  0.1403     6.2872
+Somewhat dissatisfied|Somewhat satisfied  1.8973  0.1424    13.3266
 
-Residual Deviance: 14874.12 
-AIC: 14888.12 
+Residual Deviance: 15988.12 
+AIC: 16004.12
 
-#So now we need to interpret a model ad define which variables are statistically impotant. For this we will use Anova function from
-#pakage 'car'. As we can see below there is only one variable that should be considered as the main influencer on type of card.
+#So now we need to interpret a model and define which variables are statistically impotant. For this we will use Anova function from
+#pakage 'car'. As we can see below there are two variables that influence the class of Satisfaction with the job and thay are: age and 
+#income. Suprisingly education is not a big deal for being satisfied with your job. 
 > Anova(model)
 Analysis of Deviance Table (Type II tests)
 
-Response: factor(card)
+Response: factor(jobsat)
        LR Chisq Df Pr(>Chisq)    
-gender   0.6727  1  0.4120956    
-age      1.2716  1  0.2594574    
-income  11.3632  1  0.0007491 ***
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+age      62.371  1  2.845e-15 ***
+gender    1.622  1    0.20286    
+income    4.349  1    0.03704 *  
+ed        0.103  1    0.74878    
 
 #We can do this in a different way to get detailed p-values for each factor: 
 > df.coef <- coef(summary(model))
 > p <- pnorm(abs(df.coef[,'t value']), lower.tail = F)*2
 > p
-             genderFemale                       age                    income 
-             4.121111e-01              2.596005e-01              7.607381e-04 
-               Visa|Other    Other|American Express American Express|Discover 
-             2.479347e-31              2.881087e-19              8.619020e-02 
-      Discover|Mastercard 
-             6.021519e-58 
+                                     age                             genderFemale 
+                            3.243848e-15                             2.028770e-01 
+                                  income                                       ed 
+                            3.809227e-02                             7.488099e-01 
+             Neutral|Highly dissatisfied     Highly dissatisfied|Highly satisfied 
+                            2.054139e-08                             2.794414e-01 
+  Highly satisfied|Somewhat dissatisfied Somewhat dissatisfied|Somewhat satisfied 
+                            3.231713e-10                             1.621019e-40  
 > table.coef <- cbind(df.coef, 'p value'=p)
 > table.coef
-                                 Value   Std. Error     t value      p value
-genderFemale              -0.041519028 0.0506215918  -0.8201842 4.121111e-01
-age                        0.001667982 0.0014795785   1.1273359 2.596005e-01
-income                     0.001933925 0.0005744278   3.3666985 7.607381e-04
-Visa|Other                -0.936042517 0.0803925502 -11.6433987 2.479347e-31
-Other|American Express    -0.715910683 0.0797835012  -8.9731670 2.881087e-19
-American Express|Discover  0.136059672 0.0792959615   1.7158462 8.619020e-02
-Discover|Mastercard        1.313094147 0.0818291756  16.0467723 6.021519e-58
+> table.coef
+                                                 Value   Std. Error   t value      p value
+age                                       0.0113892425 0.0014451247  7.881149 3.243848e-15
+genderFemale                             -0.0637019706 0.0500252024 -1.273398 2.028770e-01
+income                                    0.0009974852 0.0004809799  2.073861 3.809227e-02
+ed                                       -0.0025011380 0.0078109542 -0.320209 7.488099e-01
+Neutral|Highly dissatisfied              -0.7848834311 0.1399733238 -5.607379 2.054139e-08
+Highly dissatisfied|Highly satisfied      0.1508745814 0.1394952610  1.081575 2.794414e-01
+Highly satisfied|Somewhat dissatisfied    0.8821883048 0.1403142064  6.287234 3.231713e-10
+Somewhat dissatisfied|Somewhat satisfied  1.8972564990 0.1423660464 13.326608 1.621019e-40
 
 > ci <- confint(model)
 > ci
                      2.5 %      97.5 %
-genderFemale -0.1407471338 0.057695074
-age          -0.0012312261 0.004568050
-income        0.0008096361 0.003059545
+age           8.559821e-03 0.014222750
+genderFemale -1.617666e-01 0.034343417
+income        6.006846e-05 0.001937978
+ed           -1.780932e-02 0.012806877
 #Usually if the CI does not contain 0 it means that our variable is important and does contribute to the defining of dependant variable.
-#In our case gender and age are not statistically significant, though Income is crusial.
+#In our case gender and educaction are not statistically significant, though Income and Age are crusial (as Anova showed).
 
 #Now we can continue to calculation our odds ratio, as these coeficient are easier to interpret. 
-#
+
 > odds.ratio <- exp(coef(model))
 > odds.ratio
-genderFemale          age       income 
-   0.9593311    1.0016694    1.0019358 
+      age genderFemale       income           ed 
+   1.0114543    0.9382846    1.0009980    0.9975020 
+#Finally we can interpret the cofficients. The first variable age is a continuous variable so we will compare high and low values. The older
+#person has 1,1% more chanses to be satisfied then his young colleague. Second varibale is dichotomous and Females are compared to males
+# As males is our reference category. So Female workers have 6% less chanses to be satisfied then males. Income and education variables 
+#are very close to 1, so there is almost no difference between people who earn a bit and a lot and people with a lot of diplomas or just
+#a high school diploma. 
+
 > ci.odds <- exp(confint(model))
 > ci.odds
-                 2.5 %   97.5 %
-genderFemale 0.8687090 1.059392
-age          0.9987695 1.004578
-income       1.0008100 1.003064
-#So right now we can interpret our odds. We will be doing this only for the income as this is the only variable that has p-value <5%.
-# The higher is income the higher chance for our observations to choose any kind of card except Visa are multiplied by 1.002. In fact
-# we can see that the difference is not so crucial, but we remember that variance of income:
+              2.5 %   97.5 %
+age          1.0085966 1.014324
+genderFemale 0.8506397 1.034940
+income       1.0000601 1.001940
+ed           0.9823483 1.012889
+#So right now we can interpret our odds. We will be doing this for the income and age as they are the only variables that have p-value <5%.
+# The higher is income the higher chance for our observations to be more satisfied. 
+# In fact we can see that the difference is not so crucial, but we remember that variance of income:
 > summary(df$income)
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
    9.00   24.00   38.00   52.45   66.00  296.00 
-#So increase of 0.2% for each thousand eared by respondents is somehow important for us. 
 
 #To calculate goodness of fit we will come up with three coeficients called pseudoR
-> model0 <- polr(factor(card)~1,data = df, method = 'logistic', Hess = T)
-> LL0 <- logLik(model0)
-> ll1 <- logLik(model)
-> LL1 <- logLik(model)
-> mcfadden <- 1 - LL1/LLO
-Error: object 'LLO' not found
-> mcfadden <- 1 - LL1/LL0
-> mcfadden <- 1 - (LL1/LL0)
-> n <- nrow(df)
-> coxsnell <- 1 - exp((2/n)*(LL0-LL1))
-> nagel <- (1 - exp((2/n)*(LL0-LL1)))/(1-exp(LL0)^(2/n))
-> pseudo.r <- cbind('McFadden'=mcfadden, 'Cox-Snell'=coxsnell, 'Nagelkerke' = nagel)
-> pseudo.r
-        McFadden   Cox-Snell  Nagelkerke
-[1,] 0.001051058 0.003146469 0.003146469
+>  model0 <- polr(factor(jobsat)~1,data = df, method = 'logistic', Hess = T)
+>  LL0 <- logLik(model0)
+>  ll1 <- logLik(model)
+>  LL1 <- logLik(model)
+>  mcfadden <- 1 - LL1/LL0
+>  mcfadden <- 1 - (LL1/LL0)
+>  n <- nrow(df)
+>  coxsnell <- 1 - exp((2/n)*(LL0-LL1))
+>  nagel <- (1 - exp((2/n)*(LL0-LL1)))/(1-exp(LL0)^(2/n))
+>  pseudo.r <- cbind('McFadden'=mcfadden, 'Cox-Snell'=coxsnell, 'Nagelkerke' = nagel)
+>  pseudo.r
+        McFadden  Cox-Snell Nagelkerke
+[1,] 0.005075935 0.01618139 0.01618139
 
 #Now we can check for the proportional odds assumption. 
 > library(ordinal)
-> model1 <- clm(factor(card)~gender+age+income, data= df)
+> model1 <- clm(factor(jobsat)~gender+age+income+ed, data= df)
 > nominal_test(model1)
 Tests of nominal effects
 
-formula: factor(card) ~ gender + age + income
+formula: factor(jobsat) ~ gender + age + income + ed
        Df  logLik   AIC     LRT  Pr(>Chi)    
-<none>    -7437.1 14888                      
-gender  3 -7407.9 14836  58.409 1.286e-12 ***
-age     3 -7433.9 14888   6.285   0.09856 .  
-income  3 -7357.9 14736 158.267 < 2.2e-16 ***
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+<none>    -7994.1 16004                      
+gender  3 -7992.8 16008   2.584    0.4603    
+age                                          
+income  3 -7869.0 15760 250.021 < 2.2e-16 ***
+ed      3 -7977.9 15978  32.406 4.297e-07 ***
+
+#As we can see from this model, the assumption of proportional odds is met ony for gender, while Income an education does not have proportional
+#odds. This tells us we cannot use polr model to study our data and other options to do this is either partial proportional odds model or 
+#using a graphical method to determine proportional odds to double check it. 
+
+
+
+
+
 
