@@ -1,3 +1,8 @@
+install.packages("funModeling")
+install.packages('tidyverse')
+install.packages('Hmisc')
+install.packages('devtools')
+devtools::install_github("laresbernardo/lares")
 library(funModeling) 
 library(tidyverse) 
 library(Hmisc)
